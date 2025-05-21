@@ -1,92 +1,90 @@
+# 📱 스마트팜 모바일 앱 (React Native 기반)
+
 ### 📌 프로젝트 개요
 
-NaeunMinChocoFarm 백엔드는 스마트팜 통합 플랫폼의 핵심 로직과 API를 담당하는 서버 애플리케이션입니다. React 및 React Native 기반의 웹/모바일 앱과 통신하며, **농장(Farm), 구역(Section), 센서(Sensor), 환경값(습도, 온도, 일조량 등)**을 관리하는 기능을 제공합니다.
+현장에서 스마트팜을 더욱 직관적으로 관리할 수 있도록 개발된 **React Native 기반의 하이브리드 앱**
+
+로그인 기반 인증을 통해 사용자별로 등록된 팜, 구역, 센서 현황을 실시간으로 조회하고,
+
+환경 센서값 및 제어 기능을 **모바일에서도 확인 및 조작**할 수 있도록 구현
+
+---
+
+### 🧭 프로젝트 목표
+
+- 모바일 환경에서도 **센서값 실시간 확인**, **자동/수동 제어**를 안정적으로 제공
+- 사용자 전용 UI를 통해 **내 팜 중심의 정보 구조** 구현
+- 관리자와 사용자 권한 구분, 로그인 유지 및 프로필 관리 기능 제공
 
 ---
 
 ### 🛠 기술 스택
 
-| 분류 | 내용 |
+| 분류 | 기술 |
 | --- | --- |
-| 언어 | Java 17 |
-| 프레임워크 | Spring Boot 3.x |
-| ORM/DB 매핑 | MyBatis |
-| DB | MariaDB |
-| 보안 | Spring Security + JWT |
-| 웹소켓 | STOMP 기반 WebSocket 구현 |
-| 문서화 | Swagger (선택 적용 가능) |
-| 기타 | DTO 계층 분리, 예외처리 모듈화, 파일 업로드 지원 등 |
+| 프레임워크 | React Native, Expo |
+| 언어 | TypeScript |
+| UI | Tailwind-RN, React Native Elements |
+| API 통신 | Axios |
+| 실시간 통신 | WebSocket (socket.io-client) |
+| 상태 관리 | Redux Toolkit |
+| 파일 관리 | React Native Image Picker |
+| 시간 처리 | Dayjs |
 
 ---
 
-### 🧩 전체 아키텍처 구성
+### 🗂 주요 기능
 
-```
-사용자 (Web/Mobile)
-     ↓
-[NaeunMinChocoFarm API 서버]
-├─ 인증 (JWT 기반 로그인/회원가입)
-├─ 관리자 기능 (Farm/Section/Sensor 등록 및 관리)
-├─ 사용자 기능 (MyPage, 서비스 신청)
-├─ 센서 데이터 조회 (습도, 일조량, 토양, 온도 등)
-├─ 실시간 제어 (WebSocket 기반 자동 급수/어닝)
-     ↓
-[DB (MariaDB)]
-```
+### 1️⃣ 로그인 및 사용자 인증
 
----
+- 로그인 시 토큰 발급 및 Redux 상태 저장
+- `expo-router`를 사용한 인증 기반 라우팅 구현
+- 로그인 유지 및 자동 리디렉션 처리
 
-### ✅ 구현 기능 상세
+### 2️⃣ 스마트팜 대시보드
 
-### 1️⃣ 인증 및 보안
+- 내 팜 정보(이름, 주소, 작물 등) 조회
+- UUID 기반으로 식별 및 데이터 요청
+- 상태(status) 및 이용 시작일(useDate) 표시
 
-- 회원가입/로그인 및 토큰 발급 (JWT)
-- Role 기반 접근 제어 (`USER`, `ADMIN`)
-- 전역 예외 처리 및 인증 예외 커스터마이징
+### 3️⃣ 환경값 실시간 시각화
 
-### 2️⃣ 스마트팜 관리 기능
+- 내 팜의 **습도**, **일조량**, **온도** 등 센서값 표시
+- 최신값을 기준으로 카드 형태로 구성
+- WebSocket을 통해 주기적 갱신
+- `SensorCard` 컴포넌트로 센서값과 단위 시각적 표시
 
-- **Farm / Section / Sensor CRUD**
-- UUID 자동 생성 및 외래키 연결
-- Farm에 대한 Section, Section에 대한 Sensor 연결 구조 설계
+### 4️⃣ 자동/수동 제어 기능
 
-### 3️⃣ 환경 센서 데이터 처리
+- 어닝 시스템(햇빛 차단막) 자동 제어 연동
+- **일조량 기준** 자동 개폐, 수동 전환 버튼 구현
+- 제어 결과는 실시간으로 UI에 반영됨
 
-- 습도(Humidity), 일조량(LDR), 온도(Temperature), 토양수분(SoilMoisture), CO₂ 등 조회 API
-- 센서별 데이터 엔티티와 DTO 분리
-- Chart 시각화를 위한 시간대별 조회 기능 구현
+### 5️⃣ 프로필 이미지 등록 및 갱신
 
-### 4️⃣ WebSocket 기반 실시간 처리
-
-- WebSocket 연결 후 센서 데이터 수신
-- 자동/수동 급수 시스템, 어닝 자동 제어 기능 포함
-- `NcfFrame`, `NcfSubscribeHandler` 커스텀 메시지 구조 설계
-
-### 5️⃣ 프로필 이미지 업로드
-
-- `MultipartFile` 기반 이미지 업로드 처리
-- 원본 이름과 서버 저장 파일명 관리
-- 사용자 프로필과 연결되어 사용
-
-### 6️⃣ 서비스 신청 및 관리
-
-- 사용자 서비스 신청 기능
-- 관리자 승인/반려 기능
-- `ServiceApply`, `ServiceStatus` 도메인 분리 운영
+- `expo-image-picker`를 활용해 이미지 선택
+- 서버에 `MultipartFile` 기반으로 업로드
+- 프로필 이미지는 서버 URL 기반으로 갱신 표시
 
 ---
 
-### 📁 주요 디렉토리 구조 (패키지 기준)
+---
+
+### 🧾 주요 디렉토리 구조
 
 ```
-com.naeunminchocofarm.ncf_api/
-├─ smart_farm/               # Farm, Section, Sensor
-├─ humidity/                 # 습도 센서 처리
-├─ ldr/                      # 일조량 센서 처리
-├─ soil_moisture/            # 토양수분 센서
-├─ temperature/              # 온도 센서
-├─ member/                   # 회원 인증, 이미지, 정보
-├─ serviceApply/             # 서비스 신청
-├─ lib/                      # JWT, 예외, 보안, 웹소켓 공통 모듈
-└─ config/                   # 정적 리소스 설정 등
+arduino
+복사편집
+src/
+├─ app/                     ← Expo Router 기반 라우팅
+│  ├─ auth/                 ← 로그인 화면
+│  ├─ home/                 ← 홈/대시보드 화면
+│  ├─ profile/              ← 마이페이지 및 프로필 이미지
+├─ components/             ← 재사용 UI (SensorCard 등)
+├─ apis/                   ← axios 통신 모듈
+├─ redux/                  ← 상태 관리 (user, token 등)
+├─ socket/                 ← WebSocket 연결 모듈
+├─ utils/                  ← 공통 유틸 함수
+└─ assets/                 ← 이미지 및 정적 리소스
+
 ```
